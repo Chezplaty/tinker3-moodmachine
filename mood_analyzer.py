@@ -9,6 +9,8 @@ This class starts with very simple logic:
   - Convert that score into a mood label
 """
 
+import re
+import string
 from typing import List, Dict, Tuple, Optional
 
 from dataset import POSITIVE_WORDS, NEGATIVE_WORDS
@@ -52,9 +54,37 @@ class MoodAnalyzer:
           - Handle simple emojis separately (":)", ":-(", "🥲", "😂")
           - Normalize repeated characters ("soooo" -> "soo")
         """
-        cleaned = text.strip().lower()
-        tokens = cleaned.split()
+        # Text emoticons to normalize before punctuation is stripped
+        emoticon_map = {
+            ":)": "happy", ":-)": "happy", ":D": "happy",
+            ":(": "sad", ":-(": "sad",
+            ":/": "unsure", ":-/": "unsure",
+        }
+        for emoticon, word in emoticon_map.items():
+            text = text.replace(emoticon, f" {word} ")
 
+        # Pull out Unicode emojis as their own tokens before punctuation removal
+        emoji_pattern = re.compile(
+            "[\U0001F600-\U0001F64F"   # emoticons
+            "\U0001F300-\U0001F5FF"    # symbols & pictographs
+            "\U0001F680-\U0001F6FF"    # transport & map
+            "\U0001F900-\U0001F9FF"    # supplemental symbols
+            "\U00002700-\U000027BF"    # dingbats
+            "]+",
+            flags=re.UNICODE,
+        )
+        emojis = emoji_pattern.findall(text)
+        text = emoji_pattern.sub(" ", text)
+
+        # Collapse runs of 3+ identical characters down to 2: "soooo" -> "soo"
+        text = re.sub(r"(.)\1{2,}", r"\1\1", text)
+
+        # Strip punctuation, lowercase, split
+        text = text.translate(str.maketrans("", "", string.punctuation))
+        tokens = text.strip().lower().split()
+
+        # Append emoji tokens at the end (scored if added to dataset word lists)
+        tokens.extend(emojis)
         return tokens
 
     # ---------------------------------------------------------------------
