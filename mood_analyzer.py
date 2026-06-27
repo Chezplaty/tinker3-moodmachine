@@ -116,25 +116,16 @@ class MoodAnalyzer:
     def predict_label(self, text: str) -> str:
         """
         Turn the numeric score for a piece of text into a mood label.
-
-        The default mapping is:
-          - score > 0  -> "positive"
-          - score < 0  -> "negative"
-          - score == 0 -> "neutral"
-
-        TODO: You can adjust this mapping if it makes sense for your model.
-        For example:
-          - Use different thresholds (for example score >= 2 to be "positive")
-          - Add a "mixed" label for scores close to zero
-        Just remember that whatever labels you return should match the labels
-        you use in TRUE_LABELS in dataset.py if you care about accuracy.
         """
-        # TODO: Implement this method.
-        #   1. Call self.score_text(text) to get the numeric score.
-        #   2. Return "positive" if the score is above 0.
-        #   3. Return "negative" if the score is below 0.
-        #   4. Return "neutral" otherwise.
-        pass
+        score = self.score_text(text)
+        if score > 2:
+            return "positive"
+        elif score < -2:
+            return "negative"
+        elif score == 0:
+            return "neutral"
+        else:
+            return "mixed"
 
     # ---------------------------------------------------------------------
     # Explanations (optional but recommended)
