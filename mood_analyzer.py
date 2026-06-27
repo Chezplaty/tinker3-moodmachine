@@ -98,15 +98,19 @@ class MoodAnalyzer:
             "not", "never", "no", "neither",
             "dont", "doesnt", "didnt", "wont", "cant", "couldnt", "shouldnt", "wouldnt",
         }
+        emphasis_words = {"so", "very", "really", "extremely", "absolutely", "super", "totally"}
 
         tokens = self.preprocess(text)
         score = 0
         for i, token in enumerate(tokens):
-          negated = i > 0 and tokens[i - 1] in negation_words
-          if token in self.positive_words:
-            score += -1 if negated else 1
-          elif token in self.negative_words:
-            score += 1 if negated else -1
+            negated = i > 0 and tokens[i - 1] in negation_words
+            emphasized = i > 0 and tokens[i - 1] in emphasis_words
+            if token in self.positive_words:
+                delta = -1 if negated else 1
+                score += delta * 2 if emphasized else delta
+            elif token in self.negative_words:
+                delta = 1 if negated else -1
+                score += delta * 2 if emphasized else delta
         return score
 
     # ---------------------------------------------------------------------
