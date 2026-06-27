@@ -91,8 +91,8 @@ class MoodAnalyzer:
     # Scoring logic
     # ---------------------------------------------------------------------
 
-    def score_text(self, text: str) -> int:
-       
+    def score_text(self, text: str) -> Tuple[int, int]:
+        """Returns (pos_score, neg_score) separately so mixed sentiment isn't lost."""
         # Apostrophes are stripped by preprocess, so "don't" becomes "dont"
         negation_words = {
             "not", "never", "no", "neither",
@@ -101,17 +101,26 @@ class MoodAnalyzer:
         emphasis_words = {"so", "very", "really", "extremely", "absolutely", "super", "totally"}
 
         tokens = self.preprocess(text)
-        score = 0
+        pos_score = 0
+        neg_score = 0
         for i, token in enumerate(tokens):
             negated = i > 0 and tokens[i - 1] in negation_words
             emphasized = i > 0 and tokens[i - 1] in emphasis_words
             if token in self.positive_words:
                 delta = -1 if negated else 1
-                score += delta * 2 if emphasized else delta
+                delta = delta * 2 if emphasized else delta
+                if delta > 0:
+                    pos_score += delta
+                else:
+                    neg_score += delta
             elif token in self.negative_words:
                 delta = 1 if negated else -1
-                score += delta * 2 if emphasized else delta
-        return score
+                delta = delta * 2 if emphasized else delta
+                if delta < 0:
+                    neg_score += delta
+                else:
+                    pos_score += delta
+        return pos_score, neg_score
 
     # ---------------------------------------------------------------------
     # Label prediction
@@ -121,15 +130,15 @@ class MoodAnalyzer:
         """
         Turn the numeric score for a piece of text into a mood label.
         """
-        score = self.score_text(text)
-        if score > 2:
-            return "positive"
-        elif score < -2:
-            return "negative"
-        elif score == 0:
-            return "neutral"
-        else:
+        pos, neg = self.score_text(text)
+        if pos > 0 and neg < 0:
             return "mixed"
+        elif pos > 0:
+            return "positive"
+        elif neg < 0:
+            return "negative"
+        else:
+            return "neutral"
 
     # ---------------------------------------------------------------------
     # Explanations (optional but recommended)

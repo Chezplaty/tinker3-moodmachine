@@ -23,6 +23,16 @@ POSITIVE_WORDS = [
     "chill",
     "relaxed",
     "amazing",
+    "proud",
+    "relieved",
+    "hopeful",
+    "laugh",
+    "glad",
+    "wonderful",
+    "enjoy",
+    "grateful",
+    "thankful",
+    "fantastic",
 ]
 
 NEGATIVE_WORDS = [
@@ -36,6 +46,16 @@ NEGATIVE_WORDS = [
     "stressed",
     "hate",
     "boring",
+    "overwhelmed",
+    "frustrated",
+    "anxious",
+    "worried",
+    "horrible",
+    "miserable",
+    "dread",
+    "exhausted",
+    "stuck",
+    "piling",
 ]
 
 # ---------------------------------------------------------------------
